@@ -2,55 +2,58 @@
 
 /* Example:
 
-   data MyT t1 t2 = Cons1 t1 | Cons2 t1 t2;
+   data List t1 = Nil | Cons t1 (List t1);
 
+   ----------------
+   
    int main() {
-       MyT<int, int> my_t(Cons1, 3);
-       printf("Hi.\n");
+       int x = 1;
+       List<int> empty(Nil);
+       List<int> one(Cons, &x, &empty);
    }
 */
 
-// will be transformed to:
-//-------------------------
+// Above definition will be transformed to:
+//-----------------------------------------
 
-enum MyT_Sum {
-    T_INVALID,
-    T_CONS1,
-    T_CONS2,
+enum Dummy_List_Nil {} Nil;
+enum Dummy_List_Cons {} Cons;
+
+template <typename T1> class List;
+
+template <typename T1> struct List_Nil {};
+template <typename T1> struct List_Cons {
+    T1 *t1;
+    List<T1> *t2;
 };
 
-enum Dummy_T_Cons1 {} _Cons1;
-enum Dummy_T_Cons2 {} _Cons2;
 
-template <typename T1, typename T2> class MyT {
-    struct MyT_Cons1 {
-        T1 t1;
+template <typename T1> class List {
+    enum List_Sum {
+        List_Sum_INVALID,
+        List_Sum_Nil,
+        List_Sum_Cons,
     };
-    struct MyT_Cons2 {
-        T1 t1;
-        T2 t2;
-    };
-    union MyT_Data {
-        struct MyT_Cons1 Cons1;
-        struct MyT_Cons2 Cons2;
+    union List_Data {
+        List_Nil<T1> Nil;
+        List_Cons<T1> Cons;
     };
 
-    union MyT_Data m_data;
-    enum MyT_Sum m_constructor;
+    union List_Data m_data;
+    enum List_Sum m_constructor;
     
-    MyT() {
-        m_constructor = T_INVALID;
+    List() {
+        m_constructor = List_Sum_INVALID;
     };
     
 public:    
-    MyT(enum Dummy_T_Cons1 dummy, T1 t1) {
-        m_constructor = T_CONS1;
-        m_data.Cons1.t1 = t1;
+    List(enum Dummy_List_Nil dummy) {
+        m_constructor = List_Sum_Nil;
     };
-    MyT(enum Dummy_T_Cons2 dummy,T1 t1, T1 t2) {
-        m_constructor = T_CONS2;
-        m_data.Cons2.t1 = t1;
-        m_data.Cons2.t2 = t2;
+    List(enum Dummy_List_Cons dummy, T1 *t1, List<T1> *t2) {
+        m_constructor = List_Sum_Cons;
+        m_data.Cons.t1 = t1;
+        m_data.Cons.t2 = t2;
     };
 };
 
@@ -59,6 +62,9 @@ public:
 #include <stdio.h>
 
 int main() {
-    MyT<int, int> my_t(Cons1, 3);
-    printf("Hi.\n");
+    int x = 1;
+    
+    List<int> empty(Nil);
+    List<int> one(Cons, &x, &empty);
+    
 }
