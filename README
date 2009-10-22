@@ -1,0 +1,4 @@
+cext = C with extensions
+trying to add stuff like:
+* polymorphic ADTs
+* Type classes :)
